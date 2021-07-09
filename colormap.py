@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import time
+import sys
 
 from board import SCL, SDA
 import busio
@@ -14,7 +15,11 @@ from adafruit_pca9685 import PCA9685
 i2c = busio.I2C(SCL, SDA)
 
 # Create a simple PCA9685 class instance.
-pca = PCA9685(i2c, address=64)
+dev_index = 0
+if len(sys.argv) > 1:
+	dev_index = int(sys.argv[1])
+
+pca = PCA9685(i2c, address=64+dev_index)
 # You can optionally provide a finer tuned reference clock speed to improve the accuracy of the
 # timing pulses. This calibration will be specific to each board and its environment. See the
 # calibration.py example in the PCA9685 driver.

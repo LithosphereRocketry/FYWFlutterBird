@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import freenect
 import matplotlib.pyplot as mp
-from scipy.ndimage import gaussian_filter
 import numpy as np
 import signal
 import time

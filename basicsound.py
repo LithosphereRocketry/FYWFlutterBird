@@ -39,12 +39,12 @@ class Feather:
 		self.pca.channels[self.gPin].duty_cycle = int(self.__clip(self.color[1]*intensity*256*whiteBalance[1], 0, 65535))
 		self.pca.channels[self.bPin].duty_cycle = int(self.__clip(self.color[2]*intensity*256*whiteBalance[2], 0, 65535))
 	def setColorFromFourier(self, f, ffreqs): # Option 1 to set memory color: set colors according to Gaussian-blurred intensity on Fourier transform
-		self.color[0] = self.__normFade(self.rFreq, f, ffreqs) # Red
-		self.color[1] = self.__normFade(self.gFreq, f, ffreqs) # Green
-		self.color[2] = self.__normFade(self.bFreq, f, ffreqs) # Blue
-	
+		self.color[0] = self.__fastNormFade(self.rFreq, f, ffreqs) # Red
+		self.color[1] = self.__fastNormFade(self.gFreq, f, ffreqs) # Green
+		self.color[2] = self.__fastNormFade(self.bFreq, f, ffreqs) # Blue	
 	def debugColor(self, intensity=1): # Testing function, displays current memory color as int, scaled by intensity; no white balances
 		return "("+str(int(self.color[0]*intensity))+", "+str(int(self.color[1]*intensity))+", "+str(int(self.color[2]*intensity))+")"
+	
 	#Private utility functions
 	def __clip(self, n, lower, upper): # Limit a number between upper and lower bounds
 		return min(upper, max(lower, n))	
@@ -52,11 +52,14 @@ class Feather:
 		return 27.5*math.exp(key/12*math.log(2)) # This is a nicer way to write 27.5 * ( 12root(2) ) ^ key
 	def __keyToFreqSD(self, key, spacing): # Calculate the frequency spacing between 2 keys
 		return math.log(2)/12*spacing * self.__keyToFreq(key) # since keyToFreq is exponential, its derivative is a constant * itself
-	def __normFade(self, msd, f, ffreqs): # Sum up a Gaussian "window" of a frequency spectrum
-		mu, sd = msd; # The input is a tuple (mean, standard deviation)
-		weights = [(1/chunk)*1/(sd*math.sqrt(2*math.pi)) * math.exp(-1/2 * ((x-mu)/sd)**2) for x in ffreqs] # For each frequency, create a Gaussian-curve weight based on distance from f
-		return sum(np.multiply(f, weights)) # Take a weighted sum of all frequency weights * f
-
+	def __fastNormFade(self, msd, f, ffreqs):
+		mu, sd = msd;
+		ffnp = np.asarray(ffreqs)
+		scalar = (1/chunk)*1/(sd*math.sqrt(2*math.pi))
+		exp = np.exp
+		weights = scalar * exp(-1/2 * exp((ffnp - mu)/sd)**2)
+		return np.sum(f * weights)
+	
 # Initialize hardware libraries
 i2c = busio.I2C(SCL, SDA)
 pcas = []
@@ -102,19 +105,18 @@ def maxColorValue(feathers): # find the greatest float color value in a list of 
 	maxpf = [max(f.color) for f in feathers] # list all feathers' indivudial maxes
 	return max(maxpf) # max of those
 
+def scff(f):
+	f.setColorFromFourier(pxx, bins)
+scffv = np.vectorize(scff)
+
 while True: # MAIN CONTROL LOOP
 	data = stream.read(chunk, exception_on_overflow=False) # Pull one chunk of data from the microphone
 	y_k = np.fft.fft([x/2 for x in data])[0:int(chunk/2)]/chunk # some complicated fourier transform math I don't fully understand
 	y_k[1:] = 2*y_k[1:]
-	pxx = np.abs(y_k) # pxx is the completed fourier transform
-		
-	for f in feathers: # On each feather:
-		f.setColorFromFourier(pxx, bins) # calculate the feather memory color
+	pxx = np.abs(y_k) # pxx is the completed fourier transform	
+	scffv(feathers)
 	scale = 255/maxColorValue(feathers) # calculate intensity such that the brightest LED is full brightness
 	for f in feathers: # also on each feather:
 		f.applyColor(intensity=scale) # apply the calculated color to the LEDs
-
-
-
-
-
+	feathers[int(time.time()) % 10].setServo(180)
+	feathers[int(time.time()+5) % 10].setServo(0)

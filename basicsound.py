@@ -118,5 +118,4 @@ while True: # MAIN CONTROL LOOP
 	scale = 255/maxColorValue(feathers) # calculate intensity such that the brightest LED is full brightness
 	for f in feathers: # also on each feather:
 		f.applyColor(intensity=scale) # apply the calculated color to the LEDs
-	feathers[int(time.time()) % 10].setServo(180)
-	feathers[int(time.time()+5) % 10].setServo(0)
+	

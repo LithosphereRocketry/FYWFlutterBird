@@ -1,0 +1,47 @@
+== RPI BIRD TROUBLESHOOTING GUIDE ==
+
+Component: Kinect
+
+Test: terminal command lsusb
+
+Symptom: no Kinect devices present
+Cause: Problem in USB cable
+
+Symptom: only "NUI Motor" is present, no "NUI Camera" or "NUI microphone"
+Cause: No 12V power to Kinect, double-check connections (especially floppy connector to PSU)          
+
+Component: Feathers
+
+Test: terminal command i2cdetect -y 1
+
+Symptom: sudden ramp in PSU fan or Pi red LED flickering when connecting new component
+Cause: Short in 5V line. CUT POWER IMMEDIATELY and locate the short with multimeter.
+
+Symptom: Controllers do not appear in i2cdetect
+Cause: Loose connection in SCL, SDA, or 3.3V VCC lines. When troubleshooting, bear in mind that a break at one controller will cause all "downstream" controllers to disappear.
+
+Symptom: LEDs active, but not servos
+Cause: No 5V power. Check connections.
+
+Symptom: LEDs active, but some colors missing or incorrect
+Cause: Loose connection or short on LED/servo board.
+
+Symptom: Green LED turns on when 5V is switched on
+Cause: Cables plugged into wrong positions, or possibly short from 5V to LED Green (2nd position of both headers) on power board.
+
+Component: Microphone
+
+Test: lsaudio.py
+
+Symptom: Main program throws "no microphone" or bitrate error
+Cause: Microphone not initialized or on wrong channel - lsaudio to check channel, this usually also fixes initialization for some reason.
+
+Symptom: Microphone detected but not reacting to sound
+Cause: Mircophone is hardware-muted. Press red button (it should be solid red in normal operation)
+
+Component: Neopixels
+
+Test: neopixel-test.py
+
+Symptom: Refresh rate very slow
+Cause: Code inefficiency. Ensure that auto-write is disabled, that the array is being written to exactly once per frame, and that you are not calling functions a senseless number of times.

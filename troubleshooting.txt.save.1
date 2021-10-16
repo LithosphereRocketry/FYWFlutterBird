@@ -1,0 +1,16 @@
+== RPI BIRD TROUBLESHOOTING GUIDE ==
+
+Component: Kinect
+
+Test: terminal command lsusb
+
+Symptom: no Kinect devices present
+Cause: Problem in USB cable
+
+Symptom: only "NUI Motor" is present, no "NUI Camera" or "NUI microphone"
+Cause: No 12V power to Kinect, double-check connections (especially floppy connector to PSU)
+
+Component: Feathers
+
+Symptom: sudden ramp in PSU fan or Pi red LED flickering when connecting new component
+Cause: Short in 5V line. CUT POWER IMMEDIATELY and locate the short with multimeter.

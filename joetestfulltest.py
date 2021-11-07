@@ -224,4 +224,5 @@ while keep_running:
 		f.setServoFromTime(180-distScale*180) ##180 is the full range of motion
 		f.setColorFromIntensity(distScale)
 		f.applyColor()
-	print(distScale)
+	#print(distScale)
+	print(lrIndex)

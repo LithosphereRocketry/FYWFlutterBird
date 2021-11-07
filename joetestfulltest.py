@@ -25,7 +25,7 @@ minFallTime = 0.25 # time (s) of fastest feather cycle
 maxFallTime = 2 # time (s) of slowest feather cycle
 
 nearPlane = 300  # distance at nearest point before errors
-farPlane = 800 # distance at background
+farPlane = 600 # distance at background
 
 movementTrigger = 5000 # amount of movement needed to trigger an expression
 
